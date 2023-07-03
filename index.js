@@ -35,13 +35,31 @@ var __generator = (this && this.__generator) || function (thisArg, body) {
     }
 };
 var apiUrl = 'https://icanhazdadjoke.com/';
+var latitude = 41.3851; // Latitud de Barcelona
+var longitude = 2.1734; // Longitud de Barcelona
+var url = "https://api.open-meteo.com/v1/forecast?latitude=".concat(latitude, "&longitude=").concat(longitude, "&current_weather=true");
+var Weather = /** @class */ (function () {
+    function Weather() {
+    }
+    return Weather;
+}());
+var weather;
+fetch(url)
+    .then(function (response) { return response.json(); })
+    .then(function (data) {
+    weather = data.current_weather;
+    document.querySelector('#weather').textContent = "Avui: " + getWeatherDescription(String(weather.weathercode));
+})
+    .catch(function (error) {
+    console.log('Error al obtener los datos del tiempo:', error);
+});
 function getJoke() {
     return __awaiter(this, void 0, void 0, function () {
-        var answer, joke, error_1;
+        var answer, errorMessage, error_1;
         return __generator(this, function (_a) {
             switch (_a.label) {
                 case 0:
-                    _a.trys.push([0, 5, , 6]);
+                    _a.trys.push([0, 6, , 7]);
                     return [4 /*yield*/, fetch(apiUrl, {
                             headers: {
                                 'Accept': 'application/json'
@@ -51,18 +69,18 @@ function getJoke() {
                     answer = _a.sent();
                     if (!answer.ok) return [3 /*break*/, 3];
                     return [4 /*yield*/, answer.json()];
-                case 2:
-                    joke = _a.sent();
-                    return [2 /*return*/, joke];
-                case 3:
-                    console.log('Error en obtenir l\'acudit');
+                case 2: return [2 /*return*/, _a.sent()];
+                case 3: return [4 /*yield*/, answer.text()];
+                case 4:
+                    errorMessage = _a.sent();
+                    console.log('Error en obtenir l\'acudit:', errorMessage);
                     return [2 /*return*/, { joke: '' }];
-                case 4: return [3 /*break*/, 6];
-                case 5:
+                case 5: return [3 /*break*/, 7];
+                case 6:
                     error_1 = _a.sent();
                     console.log('Error:', error_1);
                     return [2 /*return*/, { joke: '' }];
-                case 6: return [2 /*return*/];
+                case 7: return [2 /*return*/];
             }
         });
     });
@@ -70,9 +88,47 @@ function getJoke() {
 function onClickNextJoke() {
     console.log("click!");
     getJoke().then(function (r) {
-        var acuditContainer = document.querySelector('#acuditContainer');
-        acuditContainer.textContent = r.joke;
+        var jokeContainer = document.querySelector('#joke-container');
+        jokeContainer.textContent = r.joke;
     });
 }
 var button = document.querySelector('#nextJoke');
 button.addEventListener('click', function () { return onClickNextJoke(); });
+function getWeatherDescription(code) {
+    var descriptions = {
+        "NA": "No disponible",
+        "-1": "Pluja lleugera",
+        "0": "Nit clara",
+        "1": "Dia assolellat",
+        "2": "Parcialment ennuvolat (nit)",
+        "3": "Parcialment ennuvolat (dia)",
+        "4": "No utilitzat",
+        "5": "Boira",
+        "6": "Boira densa",
+        "7": "Ennuvolat",
+        "8": "Molt ennuvolat",
+        "9": "Ruixat lleuger (nit)",
+        "10": "Ruixat lleuger (dia)",
+        "11": "Orvallo",
+        "12": "Pluja lleugera",
+        "13": "Ruixat fort (nit)",
+        "14": "Ruixat fort (dia)",
+        "15": "Pluja forta",
+        "16": "Aiguaneu (nit)",
+        "17": "Aiguaneu (dia)",
+        "18": "Aiguaneu",
+        "19": "Calabruix (nit)",
+        "20": "Calabruix (dia)",
+        "21": "Granizo",
+        "22": "Nevada ligera (noche)",
+        "23": "Nevada ligera (día)",
+        "24": "Nieve ligera",
+        "25": "Nevada fuerte (noche)",
+        "26": "Nevada fuerte (día)",
+        "27": "Nieve fuerte",
+        "28": "Tormenta eléctrica (noche)",
+        "29": "Tormenta eléctrica (día)",
+        "30": "Tormenta eléctrica1"
+    };
+    return descriptions[code] || code;
+}
