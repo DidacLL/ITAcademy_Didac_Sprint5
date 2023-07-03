@@ -1,4 +1,5 @@
 const apiUrl = 'https://icanhazdadjoke.com/';
+const altApiUrl = 'https://api.chucknorris.io/jokes/random';
 const latitude = 41.3851; // Latitud de Barcelona
 const longitude = 2.1734; // Longitud de Barcelona
 const url = `https://api.open-meteo.com/v1/forecast?latitude=${latitude}&longitude=${longitude}&current_weather=true`;
@@ -56,6 +57,25 @@ async function getJoke(): Promise<{ joke: string }> {
         return {joke: ''};
     }
 }
+async function getAltJoke(): Promise<{ value: string }> {
+    try {
+        const answer = await fetch(altApiUrl, {
+            headers: {
+                'Accept': 'application/json'
+            }
+        });
+        if (answer.ok) {
+            return await answer.json();
+        } else {
+            const errorMessage = await answer.text();
+            console.log('Error en obtenir l\'acudit:', errorMessage);
+            return {value: ''};
+        }
+    } catch (error) {
+        console.log('Error:', error);
+        return {value: ''};
+    }
+}
 
 function reportScore(score: number, joke: string) {
     console.log("reportScore: " + score + " -> " + joke);
@@ -85,11 +105,12 @@ function createScoreButtons( joke: string ) {
 }
 
 function onClickNextJoke() {
-    console.log("click!")
-    getJoke().then(r => {
+    const alt= Date.now()%2===0;
+    console.log("searching joke from "+ (alt?"ChuckNorris":"Anonymous"));
+    (alt?getAltJoke():getJoke()).then(r => {
         const jokeContainer = document.querySelector('#joke-container');
-        jokeContainer.textContent = r.joke;
-        createScoreButtons(r.joke);
+        jokeContainer.textContent = alt?r["value"]:r["joke"];
+        createScoreButtons(alt?r["value"]:r["joke"]);
     });
 }
 

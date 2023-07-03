@@ -35,6 +35,7 @@ var __generator = (this && this.__generator) || function (thisArg, body) {
     }
 };
 var apiUrl = 'https://icanhazdadjoke.com/';
+var altApiUrl = 'https://api.chucknorris.io/jokes/random';
 var latitude = 41.3851; // Latitud de Barcelona
 var longitude = 2.1734; // Longitud de Barcelona
 var url = "https://api.open-meteo.com/v1/forecast?latitude=".concat(latitude, "&longitude=").concat(longitude, "&current_weather=true");
@@ -94,6 +95,38 @@ function getJoke() {
         });
     });
 }
+function getAltJoke() {
+    return __awaiter(this, void 0, void 0, function () {
+        var answer, errorMessage, error_2;
+        return __generator(this, function (_a) {
+            switch (_a.label) {
+                case 0:
+                    _a.trys.push([0, 6, , 7]);
+                    return [4 /*yield*/, fetch(altApiUrl, {
+                            headers: {
+                                'Accept': 'application/json'
+                            }
+                        })];
+                case 1:
+                    answer = _a.sent();
+                    if (!answer.ok) return [3 /*break*/, 3];
+                    return [4 /*yield*/, answer.json()];
+                case 2: return [2 /*return*/, _a.sent()];
+                case 3: return [4 /*yield*/, answer.text()];
+                case 4:
+                    errorMessage = _a.sent();
+                    console.log('Error en obtenir l\'acudit:', errorMessage);
+                    return [2 /*return*/, { value: '' }];
+                case 5: return [3 /*break*/, 7];
+                case 6:
+                    error_2 = _a.sent();
+                    console.log('Error:', error_2);
+                    return [2 /*return*/, { value: '' }];
+                case 7: return [2 /*return*/];
+            }
+        });
+    });
+}
 function reportScore(score, joke) {
     console.log("reportScore: " + score + " -> " + joke);
     var curr = new Date();
@@ -113,11 +146,12 @@ function createScoreButtons(joke) {
     document.querySelector('#score3').addEventListener('click', function () { return reportScore(3, joke); });
 }
 function onClickNextJoke() {
-    console.log("click!");
-    getJoke().then(function (r) {
+    var alt = Date.now() % 2 === 0;
+    console.log("searching joke from " + (alt ? "ChuckNorris" : "Anonymous"));
+    (alt ? getAltJoke() : getJoke()).then(function (r) {
         var jokeContainer = document.querySelector('#joke-container');
-        jokeContainer.textContent = r.joke;
-        createScoreButtons(r.joke);
+        jokeContainer.textContent = alt ? r["value"] : r["joke"];
+        createScoreButtons(alt ? r["value"] : r["joke"]);
     });
 }
 var button = document.querySelector('#nextJoke');
