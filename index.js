@@ -44,6 +44,15 @@ var Weather = /** @class */ (function () {
     return Weather;
 }());
 var weather;
+var ReportJoke = /** @class */ (function () {
+    function ReportJoke(joke, score, date) {
+        this.date = date;
+        this.joke = joke;
+        this.score = score;
+    }
+    return ReportJoke;
+}());
+var reports = [];
 fetch(url)
     .then(function (response) { return response.json(); })
     .then(function (data) {
@@ -85,11 +94,30 @@ function getJoke() {
         });
     });
 }
+function reportScore(score, joke) {
+    console.log("reportScore: " + score + " -> " + joke);
+    var curr = new Date();
+    var val = new ReportJoke(joke, score, curr.toISOString());
+    reports.push(val);
+    console.log(reports);
+    document.querySelector('#score-buttons').innerHTML = "\n        Gr\u00E0cies per opinar!\n        <button id=\"changeScore\" class=\"btn btn-primary mx-1\">Canviar votaci\u00F3</button>\n    ";
+    document.querySelector('#changeScore').addEventListener('click', function () {
+        reports.pop(); // Eliminar el último registro de votación
+        createScoreButtons(joke);
+    });
+}
+function createScoreButtons(joke) {
+    document.querySelector('#score-buttons').innerHTML = "\n            <button id=\"score1\" class=\"btn btn-primary mx-1\">1</button>\n            <button id=\"score2\" class=\"btn btn-primary mx-1\">2</button>\n            <button id=\"score3\" class=\"btn btn-primary mx-1\">3</button>\n            ";
+    document.querySelector('#score1').addEventListener('click', function () { return reportScore(1, joke); });
+    document.querySelector('#score2').addEventListener('click', function () { return reportScore(2, joke); });
+    document.querySelector('#score3').addEventListener('click', function () { return reportScore(3, joke); });
+}
 function onClickNextJoke() {
     console.log("click!");
     getJoke().then(function (r) {
         var jokeContainer = document.querySelector('#joke-container');
         jokeContainer.textContent = r.joke;
+        createScoreButtons(r.joke);
     });
 }
 var button = document.querySelector('#nextJoke');
